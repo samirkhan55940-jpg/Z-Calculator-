@@ -50,7 +50,16 @@ jobs:
           
           gradle wrapper --gradle-version 8.4
 
-      - name: "5. Android Config & Symja Integration (With Master Duplicate Fix)"
+      - name: "5. R8 Shrinking & ProGuard Rules (Size 30% Kam)"
+        run: |
+          cat << 'EOF' > app/proguard-rules.pro
+          # Z+² Smart Shrinking Rules
+          -keep class org.matheclipse.** { *; }
+          -dontwarn org.matheclipse.**
+          -keep class com.zeeshan.calculator.** { *; }
+          EOF
+
+      - name: "6. Android Config (With R8 Shrinking Enabled)"
         run: |
           cat << 'EOF' > app/build.gradle
           plugins { id 'com.android.application' }
@@ -61,13 +70,22 @@ jobs:
                   applicationId 'com.zeeshan.calculator'
                   minSdk 26
                   targetSdk 34
-                  versionCode 11
-                  versionName "11.0-Max-Pro"
+                  versionCode 12
+                  versionName "12.0-ZeroCrash-Pro"
                   multiDexEnabled true
+              }
+              buildTypes {
+                  debug {
+                      minifyEnabled true
+                      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                  }
+                  release {
+                      minifyEnabled true
+                      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                  }
               }
               compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
               
-              // YAHAN MASTER FIX ADD KIYA HAI - Saari duplicate XML/XSD files ko automatically sambhalne ke liye
               packagingOptions {
                   pickFirst '**/*.xsd'
                   exclude 'META-INF/DEPENDENCIES'
@@ -88,7 +106,7 @@ jobs:
           }
           EOF
 
-      - name: "6. Narrative UI - Visuals & Colors"
+      - name: "7. Narrative UI - Visuals & Colors"
         run: |
           cat << 'EOF' > app/src/main/res/values/colors.xml
           <resources>
@@ -125,7 +143,7 @@ jobs:
           </resources>
           EOF
 
-      - name: "7. Create UI Drawables & Real Asset Files"
+      - name: "8. Create UI Drawables & Real Asset Files"
         run: |
           cat << 'EOF' > app/src/main/assets/circle_diagram.svg
           <svg height="100" width="100" xmlns="http://www.w3.org/2000/svg">
@@ -153,7 +171,7 @@ jobs:
           <shape xmlns:android="http://schemas.android.com/apk/res/android"><solid android:color="@color/btn_top"/><corners android:radius="24dp"/></shape>
           EOF
 
-      - name: "8. Narrative UI XML"
+      - name: "9. Narrative UI XML"
         run: |
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -169,7 +187,7 @@ jobs:
 
                   <LinearLayout android:id="@+id/chat_container" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_below="@id/top_bar" android:orientation="vertical" android:background="@color/bg_chat" android:visibility="gone">
                       <ScrollView android:id="@+id/chat_scroll" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
-                          <TextView android:id="@+id/tv_chat_logs" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="15dp" android:textColor="@color/text_main" android:textSize="16sp" android:text="Z+² AI (Linguistic > Logic > Narrative): System Ready. Ask me equations or concepts...\n\n"/>
+                          <TextView android:id="@+id/tv_chat_logs" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="15dp" android:textColor="@color/text_main" android:textSize="16sp" android:text="Z+² AI: System Ready. I am loading in background. Ask me equations...\n\n"/>
                       </ScrollView>
                       <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="10dp" android:gravity="center_vertical" android:background="@color/bg_main">
                           <EditText android:id="@+id/et_chat_input" android:layout_width="0dp" android:layout_height="50dp" android:layout_weight="1" android:background="@drawable/bg_chat_input" android:hint="Type equation or speak..." android:paddingStart="15dp" android:textColorHint="@color/text_sec" android:textColor="@color/text_main"/>
@@ -226,7 +244,7 @@ jobs:
           </androidx.drawerlayout.widget.DrawerLayout>
           EOF
 
-      - name: "9. AndroidManifest"
+      - name: "10. AndroidManifest"
         run: |
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -241,7 +259,7 @@ jobs:
           </manifest>
           EOF
 
-      - name: "10. Arabi Matrix"
+      - name: "11. Arabi Matrix"
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/ArabiMatrix.java
           package com.zeeshan.calculator;
@@ -267,7 +285,7 @@ jobs:
           }
           EOF
 
-      - name: "11. Main Activity"
+      - name: "12. Main Activity (Lazy Load, Smart Cache, High Priority CPU)"
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/MainActivity.java
           package com.zeeshan.calculator;
@@ -299,7 +317,10 @@ jobs:
           import org.matheclipse.core.interfaces.IExpr;
           
           import java.util.ArrayList;
+          import java.util.HashMap;
           import java.util.Locale;
+          import java.util.concurrent.ExecutorService;
+          import java.util.concurrent.Executors;
 
           public class MainActivity extends AppCompatActivity {
               private DrawerLayout drawerLayout;
@@ -313,14 +334,16 @@ jobs:
               private Vibrator vibrator;
               private ArrayList<String> historyList = new ArrayList<>();
               private boolean isChatOpen = false;
+              
+              // MASTER FIXES: Cache & Multi-threading
               private ExprEvaluator mathEngine;
+              private HashMap<String, String> smartCache = new HashMap<>();
+              private ExecutorService cpuExecutor = Executors.newSingleThreadExecutor();
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
                   setContentView(R.layout.activity_main);
-                  
-                  mathEngine = new ExprEvaluator(false, (short) 100);
                   
                   display = findViewById(R.id.tv_display);
                   expressionDisplay = findViewById(R.id.tv_expression);
@@ -331,6 +354,15 @@ jobs:
                   calcContainer = findViewById(R.id.calc_container);
                   drawerLayout = findViewById(R.id.drawer_layout);
                   vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+                  // LAZY LOADING: Load Engine in Background (No Startup Crash)
+                  cpuExecutor.execute(() -> {
+                      android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                      mathEngine = new ExprEvaluator(false, (short) 100);
+                      runOnUiThread(() -> {
+                          chatLogs.append("Z+² AI: Symja Matrix Loaded 100%. App is ready!\n");
+                      });
+                  });
 
                   tts = new TextToSpeech(this, status -> {
                       if (status == TextToSpeech.SUCCESS) tts.setLanguage(new Locale("en", "IN"));
@@ -390,9 +422,7 @@ jobs:
                   if (conceptId != -1) {
                       String binaryCode = ArabiMatrix.toBinary(conceptId);
                       String conceptLogic = ArabiMatrix.getFormulaFromId(conceptId);
-                      
                       chatLogs.append("[System] Hash ID: " + conceptId + " | Binary Signal: " + binaryCode + "\n");
-                      
                       if(conceptId == 4001) {
                           narrateAndLog("Geometry Match! Formula: " + conceptLogic + ". Pura math likhein.");
                           return;
@@ -410,30 +440,55 @@ jobs:
                   calculateSymjaResult(processingText, true);
               }
 
-              private void calculateSymjaResult(String expression, boolean isFromChat) {
-                  try {
-                      if (expression.isEmpty()) return;
-                      if(!isFromChat) expressionDisplay.setText(expression);
-                      
-                      IExpr result = mathEngine.eval(expression);
-                      String finalResult = result.toString();
-                      
-                      historyList.add(expression + " = " + finalResult);
-                      
-                      if(isFromChat) {
-                          narrateAndLog("Result: " + finalResult);
-                      } else {
-                          display.setText(finalResult);
-                          currentExpression.setLength(0);
-                          currentExpression.append(finalResult);
+              private void calculateSymjaResult(final String expression, final boolean isFromChat) {
+                  if (expression.isEmpty()) return;
+                  if(!isFromChat) expressionDisplay.setText(expression);
+                  
+                  // SMART CACHE: Instant Result
+                  if (smartCache.containsKey(expression)) {
+                      String cachedResult = smartCache.get(expression);
+                      applyFinalResult(expression, cachedResult, isFromChat);
+                      return;
+                  }
+
+                  // HIGH PRIORITY CPU THREADING
+                  if(isFromChat) chatLogs.append("Z+² AI: Processing...\n");
+                  else display.setText("...");
+
+                  cpuExecutor.execute(() -> {
+                      android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_FOREGROUND);
+                      try {
+                          while(mathEngine == null) { Thread.sleep(100); } // Wait if engine is still loading
+                          IExpr result = mathEngine.eval(expression);
+                          final String finalResult = result.toString();
+                          
+                          // Save to Cache
+                          smartCache.put(expression, finalResult);
+                          
+                          runOnUiThread(() -> {
+                              applyFinalResult(expression, finalResult, isFromChat);
+                          });
+                      } catch (Exception e) {
+                          runOnUiThread(() -> {
+                              if(isFromChat) {
+                                  narrateAndLog("Equation samajh nahi aayi. Format check karein.");
+                              } else {
+                                  display.setText("Error");
+                                  currentExpression.setLength(0);
+                              }
+                          });
                       }
-                  } catch (Exception e) {
-                      if(isFromChat) {
-                          narrateAndLog("Equation samajh nahi aayi. Sirf Math format check karein.");
-                      } else {
-                          display.setText("Error");
-                          currentExpression.setLength(0);
-                      }
+                  });
+              }
+
+              private void applyFinalResult(String expression, String finalResult, boolean isFromChat) {
+                  historyList.add(expression + " = " + finalResult);
+                  if(isFromChat) {
+                      narrateAndLog("Result: " + finalResult);
+                  } else {
+                      display.setText(finalResult);
+                      currentExpression.setLength(0);
+                      currentExpression.append(finalResult);
                   }
               }
 
@@ -501,12 +556,13 @@ jobs:
               protected void onDestroy() {
                   if (tts != null) { tts.stop(); tts.shutdown(); }
                   if (speechRecognizer != null) { speechRecognizer.destroy(); }
+                  if (cpuExecutor != null) { cpuExecutor.shutdown(); }
                   super.onDestroy();
               }
           }
           EOF
 
-      - name: "12. Create Custom Icon (Black & Blue Design)"
+      - name: "13. Create Custom Icon (Black & Blue Design)"
         run: |
           cat << 'EOF' > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
@@ -525,13 +581,12 @@ jobs:
           cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml app/src/main/res/mipmap-xhdpi/ic_launcher.xml
           cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml app/src/main/res/mipmap-xhdpi/ic_launcher_round.xml
 
-      - name: "13. Compile & Build Final APK"
+      - name: "14. Compile & Build Final APK"
         run: |
-          echo "Starting the heavy build process with Maximum RAM..."
           chmod +x gradlew
           ./gradlew assembleDebug --stacktrace --info
 
-      - name: "14. Upload Final Premium APK"
+      - name: "15. Upload Final Premium APK"
         uses: actions/upload-artifact@v4
         with:
           name: "Z-Plus-Squared-Calculator"
