@@ -50,7 +50,7 @@ jobs:
           
           gradle wrapper --gradle-version 8.4
 
-      - name: "5. Android Config & Symja Integration (With Duplicate File Fix)"
+      - name: "5. Android Config & Symja Integration (With Master Duplicate Fix)"
         run: |
           cat << 'EOF' > app/build.gradle
           plugins { id 'com.android.application' }
@@ -67,9 +67,9 @@ jobs:
               }
               compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
               
-              // YAHAN FIX ADD KIYA HAI - Duplicate files ko ignore karne ke liye
+              // YAHAN MASTER FIX ADD KIYA HAI - Saari duplicate XML/XSD files ko automatically sambhalne ke liye
               packagingOptions {
-                  exclude 'graphml.xsd'
+                  pickFirst '**/*.xsd'
                   exclude 'META-INF/DEPENDENCIES'
                   exclude 'META-INF/LICENSE'
                   exclude 'META-INF/LICENSE.txt'
