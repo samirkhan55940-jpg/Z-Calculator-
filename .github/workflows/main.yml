@@ -50,7 +50,7 @@ jobs:
           
           gradle wrapper --gradle-version 8.4
 
-      - name: "5. Android Config & Symja Integration"
+      - name: "5. Android Config & Symja Integration (With Duplicate File Fix)"
         run: |
           cat << 'EOF' > app/build.gradle
           plugins { id 'com.android.application' }
@@ -66,6 +66,20 @@ jobs:
                   multiDexEnabled true
               }
               compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+              
+              // YAHAN FIX ADD KIYA HAI - Duplicate files ko ignore karne ke liye
+              packagingOptions {
+                  exclude 'graphml.xsd'
+                  exclude 'META-INF/DEPENDENCIES'
+                  exclude 'META-INF/LICENSE'
+                  exclude 'META-INF/LICENSE.txt'
+                  exclude 'META-INF/license.txt'
+                  exclude 'META-INF/NOTICE'
+                  exclude 'META-INF/NOTICE.txt'
+                  exclude 'META-INF/notice.txt'
+                  exclude 'META-INF/ASL2.0'
+                  exclude 'META-INF/*.kotlin_module'
+              }
           }
           dependencies {
               implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -513,6 +527,7 @@ jobs:
 
       - name: "13. Compile & Build Final APK"
         run: |
+          echo "Starting the heavy build process with Maximum RAM..."
           chmod +x gradlew
           ./gradlew assembleDebug --stacktrace --info
 
