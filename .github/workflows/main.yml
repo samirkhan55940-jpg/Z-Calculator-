@@ -1,4 +1,4 @@
-name: "Build Z Plus 2 AI Master (Makkhan Edition)"
+name: "Build Zeeshan Pro Calc (Independence Update)"
 
 on:
   push:
@@ -34,7 +34,7 @@ jobs:
           cat << 'EOF' > settings.gradle
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral(); maven { url 'https://jitpack.io' } } }
-          rootProject.name = "ZPlusSquaredAI"
+          rootProject.name = "ZeeshanProCalc"
           include ':app'
           EOF
 
@@ -43,14 +43,14 @@ jobs:
           EOF
 
           cat << 'EOF' > gradle.properties
-          org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8
+          org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8
           android.useAndroidX=true
           android.enableJetifier=true
           EOF
           
           gradle wrapper --gradle-version 8.4
 
-      - name: "5. Android Native Configuration (Crash Free)"
+      - name: "5. Android Native Config (Master Build Fix)"
         run: |
           cat << 'EOF' > app/build.gradle
           plugins { id 'com.android.application' }
@@ -61,20 +61,25 @@ jobs:
                   applicationId 'com.zeeshan.calculator'
                   minSdk 26
                   targetSdk 34
-                  versionCode 15
-                  versionName "15.0-Makkhan-Edition"
+                  versionCode 18
+                  versionName "18.0-Independence"
               }
               buildTypes {
-                  debug {
-                      minifyEnabled true
-                      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-                  }
-                  release {
-                      minifyEnabled true
-                      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-                  }
+                  debug { minifyEnabled true; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' }
+                  release { minifyEnabled true; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' }
               }
               compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+              
+              // Bulletproof Packaging to avoid duplicate/missing file crashes
+              packagingOptions {
+                  pickFirst '**/*.xsd'
+                  exclude 'META-INF/DEPENDENCIES'
+                  exclude 'META-INF/LICENSE*'
+                  exclude 'META-INF/license*'
+                  exclude 'META-INF/NOTICE*'
+                  exclude 'META-INF/notice*'
+                  exclude 'META-INF/*.kotlin_module'
+              }
           }
           dependencies {
               implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -84,33 +89,35 @@ jobs:
 
           cat << 'EOF' > app/proguard-rules.pro
           -keep class com.zeeshan.calculator.** { *; }
+          -dontwarn org.**
+          -dontwarn java.lang.management.**
           EOF
 
-      - name: "6. Narrative UI - Visuals & Colors"
+      - name: "6. Theme Visuals & Colors"
         run: |
           cat << 'EOF' > app/src/main/res/values/colors.xml
           <resources>
               <color name="bg_main">#F0F2F5</color>
-              <color name="bg_chat">#E4EFE7</color>
               <color name="btn_num">#FFFFFF</color>
               <color name="btn_top">#E0E5EC</color>
               <color name="btn_op">#FF9800</color>
               <color name="text_main">#2A3543</color>
               <color name="text_sec">#8A9AAB</color>
-              <color name="z_logo">#1B5E20</color>
+              <color name="text_live_preview">#4CAF50</color> 
+              <color name="brand_color">#1B5E20</color>
           </resources>
           EOF
 
           cat << 'EOF' > app/src/main/res/values-night/colors.xml
           <resources>
               <color name="bg_main">#1A212D</color>
-              <color name="bg_chat">#0B141B</color>
               <color name="btn_num">#2C3A4A</color>
               <color name="btn_top">#344152</color>
               <color name="btn_op">#00E676</color>
               <color name="text_main">#FFFFFF</color>
               <color name="text_sec">#8A9AAB</color>
-              <color name="z_logo">#00FF87</color>
+              <color name="text_live_preview">#00E676</color>
+              <color name="brand_color">#00FF87</color>
           </resources>
           EOF
 
@@ -123,35 +130,42 @@ jobs:
           </resources>
           EOF
 
-      - name: "7. Create UI Drawables & Assets"
+      - name: "7. Create UI Drawables"
         run: |
-          cat << 'EOF' > app/src/main/assets/circle_diagram.svg
-          <svg height="100" width="100" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="blue" />
-          </svg>
-          EOF
-          
           cat << 'EOF' > app/src/main/res/drawable/bg_btn_num.xml
           <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval"><solid android:color="@color/btn_num"/><stroke android:width="1dp" android:color="#1A000000"/></shape>
           EOF
-          
           cat << 'EOF' > app/src/main/res/drawable/bg_btn_top.xml
           <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval"><solid android:color="@color/btn_top"/></shape>
           EOF
-          
           cat << 'EOF' > app/src/main/res/drawable/bg_btn_op.xml
           <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval"><solid android:color="@color/btn_op"/></shape>
           EOF
-          
           cat << 'EOF' > app/src/main/res/drawable/bg_btn_zero.xml
           <shape xmlns:android="http://schemas.android.com/apk/res/android"><solid android:color="@color/btn_num"/><corners android:radius="40dp"/><stroke android:width="1dp" android:color="#1A000000"/></shape>
           EOF
-          
-          cat << 'EOF' > app/src/main/res/drawable/bg_chat_input.xml
-          <shape xmlns:android="http://schemas.android.com/apk/res/android"><solid android:color="@color/btn_top"/><corners android:radius="24dp"/></shape>
-          EOF
 
-      - name: "8. UI Layout XML"
+      - name: "8. 3D Dark Custom Icon"
+        run: |
+          cat << 'EOF' > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+              <path android:fillColor="#0D0D0D" android:pathData="M15,15 h78 a15,15 0 0,1 15,15 v78 a15,15 0 0,1 -15,15 h-78 a15,15 0 0,1 -15,-15 v-78 a15,15 0 0,1 15,-15 z"/>
+              <path android:fillColor="#1C1F24" android:pathData="M15,10 h78 a15,15 0 0,1 15,15 v78 a15,15 0 0,1 -15,15 h-78 a15,15 0 0,1 -15,-15 v-78 a15,15 0 0,1 15,-15 z"/>
+              <path android:fillColor="#333333" android:pathData="M53,10h2v90h-2z"/>
+              <path android:fillColor="#333333" android:pathData="M10,53h90v2h-90z"/>
+              <path android:fillColor="#FFFFFF" android:pathData="M25,31 h20 v4 h-20 z"/>
+              <path android:fillColor="#FFFFFF" android:pathData="M65,25 l4,-4 l8,8 l8,-8 l4,4 l-8,8 l8,8 l-4,4 l-8,-8 l-8,8 l-4,-4 l8,-8 z"/>
+              <path android:fillColor="#FFFFFF" android:pathData="M33,65 h4 v8 h8 v4 h-8 v8 h-4 v-8 h-8 v-4 h8 z"/>
+              <path android:fillColor="#0D47A1" android:pathData="M55,55l30,-15v50l-30,15z"/>
+              <path android:fillColor="#1976D2" android:pathData="M55,55l30,10v50l-30,-10z"/>
+              <path android:fillColor="#FFFFFF" android:pathData="M62,72 h18 v3 h-18 z M62,80 h18 v3 h-18 z"/>
+          </vector>
+          EOF
+          cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+          cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml app/src/main/res/mipmap-xhdpi/ic_launcher.xml
+          cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml app/src/main/res/mipmap-xhdpi/ic_launcher_round.xml
+
+      - name: "9. UI Layout XML (Live Preview & Language Options)"
         run: |
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -162,23 +176,14 @@ jobs:
                   <LinearLayout android:id="@+id/top_bar" android:layout_width="match_parent" android:layout_height="60dp" android:orientation="horizontal" android:gravity="center_vertical" android:padding="10dp">
                       <Button android:id="@+id/btn_menu" android:layout_width="45dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:text="≡" android:textColor="@color/text_main" android:textSize="22sp"/>
                       <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Zeeshan" android:textColor="@color/text_main" android:textSize="22sp" android:textStyle="bold" android:gravity="center"/>
-                      <Button android:id="@+id/btn_z_ai" android:layout_width="70dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:text="Z+²" android:textColor="@color/z_logo" android:textSize="18sp" android:textStyle="bold"/>
-                  </LinearLayout>
-
-                  <LinearLayout android:id="@+id/chat_container" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_below="@id/top_bar" android:orientation="vertical" android:background="@color/bg_chat" android:visibility="gone">
-                      <ScrollView android:id="@+id/chat_scroll" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
-                          <TextView android:id="@+id/tv_chat_logs" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="15dp" android:textColor="@color/text_main" android:textSize="16sp" android:text="Z+² AI Engine Ready! Main Makkhan ki tarah chalunga. Boliye...\n\n"/>
-                      </ScrollView>
-                      <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="10dp" android:gravity="center_vertical" android:background="@color/bg_main">
-                          <EditText android:id="@+id/et_chat_input" android:layout_width="0dp" android:layout_height="50dp" android:layout_weight="1" android:background="@drawable/bg_chat_input" android:hint="Type equation or speak..." android:paddingStart="15dp" android:textColorHint="@color/text_sec" android:textColor="@color/text_main"/>
-                          <Button android:id="@+id/btn_send_chat" android:layout_width="50dp" android:layout_height="50dp" android:layout_marginStart="10dp" android:background="@drawable/bg_btn_op" android:text="➤" android:textColor="#FFF" android:textSize="20sp"/>
-                          <Button android:id="@+id/btn_mic_chat" android:layout_width="50dp" android:layout_height="50dp" android:layout_marginStart="5dp" android:background="@drawable/bg_btn_top" android:text="🎤" android:textColor="@color/text_main"/>
-                      </LinearLayout>
+                      <Button android:id="@+id/btn_mic" android:layout_width="60dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:text="🎤" android:textColor="@color/text_main" android:textSize="18sp"/>
                   </LinearLayout>
 
                   <LinearLayout android:id="@+id/calc_container" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_below="@id/top_bar" android:orientation="vertical" android:padding="20dp">
+                      
                       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" android:gravity="bottom|end" android:paddingBottom="20dp">
-                          <TextView android:id="@+id/tv_expression" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textColor="@color/text_sec" android:textSize="24sp"/>
+                          <TextView android:id="@+id/tv_live_preview" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textColor="@color/text_live_preview" android:textSize="20sp" android:textStyle="bold"/>
+                          <TextView android:id="@+id/tv_expression" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textColor="@color/text_sec" android:textSize="32sp" android:layout_marginTop="5dp"/>
                           <TextView android:id="@+id/tv_display" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/text_main" android:textSize="64sp" android:maxLines="1"/>
                       </LinearLayout>
 
@@ -187,13 +192,13 @@ jobs:
                               <androidx.appcompat.widget.AppCompatButton android:text="AC" android:textColor="@color/text_main" android:background="@drawable/bg_btn_top" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="22sp"/>
                               <androidx.appcompat.widget.AppCompatButton android:text="(" android:textColor="@color/text_main" android:background="@drawable/bg_btn_top" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="22sp"/>
                               <androidx.appcompat.widget.AppCompatButton android:text=")" android:textColor="@color/text_main" android:background="@drawable/bg_btn_top" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="22sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="/" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="28sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="÷" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="28sp"/>
                           </LinearLayout>
                           <LinearLayout android:layout_width="match_parent" android:layout_height="75dp" android:orientation="horizontal" android:layout_marginBottom="12dp">
                               <androidx.appcompat.widget.AppCompatButton android:text="7" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
                               <androidx.appcompat.widget.AppCompatButton android:text="8" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
                               <androidx.appcompat.widget.AppCompatButton android:text="9" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="*" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="28sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="×" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="28sp"/>
                           </LinearLayout>
                           <LinearLayout android:layout_width="match_parent" android:layout_height="75dp" android:orientation="horizontal" android:layout_marginBottom="12dp">
                               <androidx.appcompat.widget.AppCompatButton android:text="4" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
@@ -218,21 +223,23 @@ jobs:
               </RelativeLayout>
 
               <LinearLayout android:layout_width="260dp" android:layout_height="match_parent" android:layout_gravity="start" android:background="@color/bg_main" android:orientation="vertical" android:padding="20dp">
-                  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Menu" android:textSize="26sp" android:textStyle="bold" android:textColor="@color/z_logo" android:layout_marginBottom="30dp"/>
-                  <Button android:id="@+id/nav_history" android:layout_width="match_parent" android:layout_height="50dp" android:text="History" android:background="@drawable/bg_btn_top" android:textColor="@color/text_main" android:layout_marginBottom="15dp"/>
-                  <Button android:id="@+id/nav_theme" android:layout_width="match_parent" android:layout_height="50dp" android:text="Theme Mode" android:background="@drawable/bg_btn_top" android:textColor="@color/text_main"/>
+                  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Zeeshan" android:textSize="26sp" android:textStyle="bold" android:textColor="@color/brand_color" android:layout_marginBottom="30dp"/>
+                  <Button android:id="@+id/nav_history" android:layout_width="match_parent" android:layout_height="50dp" android:text="View History" android:background="@drawable/bg_btn_top" android:textColor="@color/text_main" android:layout_marginBottom="15dp"/>
+                  <Button android:id="@+id/nav_theme" android:layout_width="match_parent" android:layout_height="50dp" android:text="Theme Mode" android:background="@drawable/bg_btn_top" android:textColor="@color/text_main" android:layout_marginBottom="15dp"/>
+                  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Script Language:" android:textColor="@color/text_sec" android:layout_marginBottom="5dp"/>
+                  <Spinner android:id="@+id/nav_language" android:layout_width="match_parent" android:layout_height="40dp" android:background="@drawable/bg_btn_top" android:padding="5dp"/>
               </LinearLayout>
           </androidx.drawerlayout.widget.DrawerLayout>
           EOF
 
-      - name: "9. AndroidManifest"
+      - name: "10. AndroidManifest"
         run: |
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.RECORD_AUDIO" />
               <uses-permission android:name="android.permission.VIBRATE" />
               <queries><intent><action android:name="android.intent.action.TTS_SERVICE" /></intent></queries>
-              <application android:label="Z+² Calculator" android:theme="@style/Theme.ZeeshanCalc" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round">
+              <application android:label="Zeeshan Calc" android:theme="@style/Theme.ZeeshanCalc" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round">
                   <activity android:name=".MainActivity" android:exported="true" android:windowSoftInputMode="adjustResize">
                       <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
                   </activity>
@@ -240,50 +247,141 @@ jobs:
           </manifest>
           EOF
 
-      - name: "10. Arabi Matrix (The Thinking Engine)"
+      - name: "11. Three Powerful Engines (Script Translate, Auto-Trim History, Makkhan Math)"
         run: |
-          cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/ArabiMatrix.java
+          cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/Engines.java
           package com.zeeshan.calculator;
+          import android.content.Context;
+          import java.io.*;
+          import java.text.NumberFormat;
+          import java.util.Locale;
 
-          public class ArabiMatrix {
-              public static int getWordId(String word) {
-                  word = word.toLowerCase().trim();
-                  if (word.contains("circle") || word.contains("daire") || word.contains("vritt")) return 4001;
-                  if (word.contains("area") || word.contains("misaha") || word.contains("raqba")) return 1002;
-                  int hash = Math.abs(word.hashCode());
-                  return hash > 0 ? hash : -1;
+          public class Engines {
+              
+              // --- ENGINE 1: SAMSUNG STYLE MATH & INDIAN FORMAT ---
+              public static class MathEngine {
+                  public static String formatIndian(double value) {
+                      NumberFormat format = NumberFormat.getInstance(new Locale("en", "IN"));
+                      format.setMaximumFractionDigits(8);
+                      format.setGroupingUsed(true);
+                      return format.format(value);
+                  }
+
+                  public static double evaluate(final String str) {
+                      return new Object() {
+                          int pos = -1, ch;
+                          void nextChar() { ch = (++pos < str.length()) ? str.charAt(pos) : -1; }
+                          boolean eat(int charToEat) {
+                              while (ch == ' ') nextChar();
+                              if (ch == charToEat) { nextChar(); return true; }
+                              return false;
+                          }
+                          double parse() { nextChar(); double x = parseExpression(); if (pos < str.length()) throw new RuntimeException("Unexpected"); return x; }
+                          double parseExpression() {
+                              double x = parseTerm();
+                              for (;;) { if (eat('+')) x += parseTerm(); else if (eat('-')) x -= parseTerm(); else return x; }
+                          }
+                          double parseTerm() {
+                              double x = parseFactor();
+                              for (;;) { if (eat('*')) x *= parseFactor(); else if (eat('/')) x /= parseFactor(); else return x; }
+                          }
+                          double parseFactor() {
+                              if (eat('+')) return parseFactor(); if (eat('-')) return -parseFactor();
+                              double x; int startPos = this.pos;
+                              if (eat('(')) { x = parseExpression(); eat(')'); }
+                              else if ((ch >= '0' && ch <= '9') || ch == '.') {
+                                  while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
+                                  x = Double.parseDouble(str.substring(startPos, this.pos));
+                              } else { throw new RuntimeException("Unexpected"); }
+                              return x;
+                          }
+                      }.parse();
+                  }
               }
-              public static String toBinary(int id) {
-                  if(id == -1) return "0000";
-                  return Integer.toBinaryString(id);
+
+              // --- ENGINE 2: SCRIPT TRANSLATOR (Hindi/Urdu Numeral Mapping) ---
+              public static class ScriptEngine {
+                  public static String applyScript(String input, String lang) {
+                      if(input == null) return "";
+                      if (lang.equals("Hindi")) {
+                          return input.replace('0','०').replace('1','१').replace('2','२').replace('3','३').replace('4','४').replace('5','५').replace('6','६').replace('7','७').replace('8','८').replace('9','९');
+                      } else if (lang.equals("Urdu")) {
+                          return input.replace('0','۰').replace('1','۱').replace('2','۲').replace('3','۳').replace('4','۴').replace('5','۵').replace('6','۶').replace('7','۷').replace('8','۸').replace('9','۹');
+                      }
+                      return input; // Default English
+                  }
+                  
+                  public static String translateToMath(String voiceInput) {
+                      String text = voiceInput.toLowerCase().trim();
+                      text = text.replace("plus", "+").replace("aur", "+").replace("add", "+").replace("jodo", "+");
+                      text = text.replace("minus", "-").replace("subtract", "-").replace("ghatao", "-");
+                      text = text.replace("multiply", "*").replace("into", "*").replace("guna", "*").replace("multiplied by", "*");
+                      text = text.replace("divide", "/").replace("bhag", "/").replace("taqseem", "/").replace("divided by", "/");
+                      text = text.replace("x", "*").replace("÷", "/").replace("×", "*");
+                      return text.replaceAll("[^0-9+\\-*/().]", ""); 
+                  }
               }
-              public static String getFormulaFromId(int id) {
-                  if(id == 4001) return "Pi * r^2";
-                  return "Mathematical Entity";
+
+              // --- ENGINE 3: TRUE 10MB PERSISTENT HISTORY (AUTO-TRIM) ---
+              public static class HistoryEngine {
+                  private static final String FILE_NAME = "calc_history_10mb.txt";
+                  private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+                  
+                  public static void save(Context context, String calculation) {
+                      try {
+                          File file = new File(context.getFilesDir(), FILE_NAME);
+                          if(file.exists() && file.length() > MAX_FILE_SIZE) {
+                              file.delete(); 
+                          }
+                          FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_APPEND);
+                          fos.write((calculation + "\n").getBytes());
+                          fos.close();
+                      } catch (Exception e) { e.printStackTrace(); }
+                  }
+                  
+                  public static String load(Context context) {
+                      StringBuilder sb = new StringBuilder();
+                      try {
+                          FileInputStream fis = context.openFileInput(FILE_NAME);
+                          BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+                          String line;
+                          while ((line = reader.readLine()) != null) {
+                              sb.insert(0, line + "\n\n"); 
+                              if (sb.length() > 50000) break; 
+                          }
+                          reader.close();
+                          fis.close();
+                      } catch (FileNotFoundException e) {
+                          return "No History Saved Yet.";
+                      } catch (Exception e) { e.printStackTrace(); }
+                      return sb.toString();
+                  }
+                  
+                  public static void clear(Context context) {
+                      context.deleteFile(FILE_NAME);
+                  }
               }
           }
           EOF
 
-      - name: "11. Main Activity (Native Makkhan Processor)"
+      - name: "12. Main Activity (High CPU Priority & Script Integration)"
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/MainActivity.java
           package com.zeeshan.calculator;
           
           import android.Manifest;
           import android.app.AlertDialog;
-          import android.content.Context;
           import android.content.Intent;
           import android.content.pm.PackageManager;
           import android.content.res.Configuration;
           import android.os.Bundle;
           import android.os.Vibrator;
+          import android.os.Process;
           import android.speech.RecognitionListener;
           import android.speech.RecognizerIntent;
           import android.speech.SpeechRecognizer;
-          import android.speech.tts.TextToSpeech;
           import android.view.View;
           import android.view.ViewGroup;
-          import android.view.inputmethod.InputMethodManager;
           import android.widget.*;
           import androidx.appcompat.app.AppCompatActivity;
           import androidx.appcompat.app.AppCompatDelegate;
@@ -291,24 +389,21 @@ jobs:
           import androidx.core.content.ContextCompat;
           import androidx.core.view.GravityCompat;
           import androidx.drawerlayout.widget.DrawerLayout;
-          
           import java.util.ArrayList;
-          import java.util.HashMap;
           import java.util.Locale;
+          import java.util.concurrent.ExecutorService;
+          import java.util.concurrent.Executors;
 
           public class MainActivity extends AppCompatActivity {
               private DrawerLayout drawerLayout;
-              private TextToSpeech tts;
               private SpeechRecognizer speechRecognizer;
-              private TextView display, expressionDisplay, chatLogs;
-              private EditText chatInput;
-              private ScrollView chatScroll;
-              private LinearLayout chatContainer, calcContainer;
+              private TextView display, expressionDisplay, livePreviewDisplay;
               private StringBuilder currentExpression = new StringBuilder();
               private Vibrator vibrator;
-              private ArrayList<String> historyList = new ArrayList<>();
-              private HashMap<String, String> smartCache = new HashMap<>();
-              private boolean isChatOpen = false;
+              private String currentScript = "English"; // Default
+              
+              // Background Executor for High Power CPU calculations
+              private ExecutorService cpuExecutor = Executors.newSingleThreadExecutor();
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
@@ -317,40 +412,43 @@ jobs:
                   
                   display = findViewById(R.id.tv_display);
                   expressionDisplay = findViewById(R.id.tv_expression);
-                  chatLogs = findViewById(R.id.tv_chat_logs);
-                  chatInput = findViewById(R.id.et_chat_input);
-                  chatScroll = findViewById(R.id.chat_scroll);
-                  chatContainer = findViewById(R.id.chat_container);
-                  calcContainer = findViewById(R.id.calc_container);
+                  livePreviewDisplay = findViewById(R.id.tv_live_preview);
                   drawerLayout = findViewById(R.id.drawer_layout);
-                  vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                  
+                  try {
+                      vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+                  } catch(Exception e){}
 
-                  tts = new TextToSpeech(this, status -> {
-                      if (status == TextToSpeech.SUCCESS) tts.setLanguage(new Locale("en", "IN"));
-                  });
                   setupVoice();
                   setupButtons(findViewById(R.id.calc_container));
 
+                  // Sidebar Controls
                   findViewById(R.id.btn_menu).setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
-                  findViewById(R.id.nav_history).setOnClickListener(v -> { drawerLayout.closeDrawer(GravityCompat.START); showHistoryDialog(); });
+                  findViewById(R.id.nav_history).setOnClickListener(v -> { 
+                      drawerLayout.closeDrawer(GravityCompat.START); 
+                      showHistoryDialog(); 
+                  });
                   findViewById(R.id.nav_theme).setOnClickListener(v -> {
                       drawerLayout.closeDrawer(GravityCompat.START);
                       int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
                       AppCompatDelegate.setDefaultNightMode(currentNightMode == Configuration.UI_MODE_NIGHT_YES ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
                   });
 
-                  findViewById(R.id.btn_z_ai).setOnClickListener(v -> {
-                      isChatOpen = !isChatOpen;
-                      chatContainer.setVisibility(isChatOpen ? View.VISIBLE : View.GONE);
-                      calcContainer.setVisibility(isChatOpen ? View.GONE : View.VISIBLE);
-                      if (vibrator != null) vibrator.vibrate(30);
+                  // Setup Script Spinner
+                  Spinner langSpinner = findViewById(R.id.nav_language);
+                  ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"English", "Hindi", "Urdu"});
+                  adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                  langSpinner.setAdapter(adapter);
+                  langSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                      @Override
+                      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                          currentScript = (String) parent.getItemAtPosition(position);
+                          updateDisplays(); // Refresh display with new script
+                      }
+                      @Override public void onNothingSelected(AdapterView<?> parent) {}
                   });
 
-                  findViewById(R.id.btn_send_chat).setOnClickListener(v -> {
-                      String q = chatInput.getText().toString();
-                      if(!q.isEmpty()) { processAiEngine(q); chatInput.setText(""); hideKeyboard(); }
-                  });
-                  findViewById(R.id.btn_mic_chat).setOnClickListener(v -> startVoiceInput());
+                  findViewById(R.id.btn_mic).setOnClickListener(v -> startVoiceInput());
               }
 
               private void setupButtons(View view) {
@@ -363,121 +461,106 @@ jobs:
               }
 
               private void onButtonClick(Button button) {
-                  if (vibrator != null) vibrator.vibrate(20);
+                  if (vibrator != null) {
+                      try{ vibrator.vibrate(20); } catch(Exception e){}
+                  }
                   String btnText = button.getText().toString();
-                  if (btnText.equals("AC")) { currentExpression.setLength(0); display.setText("0"); expressionDisplay.setText(""); }
-                  else if (btnText.equals("DEL")) { if (currentExpression.length() > 0) { currentExpression.deleteCharAt(currentExpression.length() - 1); display.setText(currentExpression.length() == 0 ? "0" : currentExpression.toString()); } }
-                  else if (btnText.equals("=")) { calculateNativeResult(currentExpression.toString(), false); }
+                  
+                  if (btnText.equals("AC")) { 
+                      currentExpression.setLength(0); 
+                      expressionDisplay.setText(""); 
+                      livePreviewDisplay.setText("");
+                      updateDisplays();
+                  }
+                  else if (btnText.equals("DEL")) { 
+                      if (currentExpression.length() > 0) { 
+                          currentExpression.deleteCharAt(currentExpression.length() - 1); 
+                          updateDisplays();
+                          updateLivePreview();
+                      } 
+                  }
+                  else if (btnText.equals("=")) { 
+                      calculateResult(currentExpression.toString()); 
+                  }
                   else {
-                      if (display.getText().toString().equals("0") || display.getText().toString().equals("Error")) { 
-                          if (!btnText.equals("/") && !btnText.equals("*") && !btnText.equals("+") && !btnText.equals("-") && !btnText.equals(".")) currentExpression.setLength(0); 
+                      String insertText = btnText;
+                      if (btnText.equals("÷")) insertText = "/";
+                      if (btnText.equals("×")) insertText = "*";
+                      
+                      if (currentExpression.length() == 0 || display.getText().toString().equals("Error")) { 
+                          if (!insertText.equals("/") && !insertText.equals("*") && !insertText.equals("+") && !insertText.equals("-") && !insertText.equals(".")) {
+                              currentExpression.setLength(0); 
+                          }
                       }
-                      currentExpression.append(btnText); display.setText(currentExpression.toString());
+                      currentExpression.append(insertText); 
+                      updateDisplays();
+                      updateLivePreview();
                   }
               }
 
-              private void processAiEngine(String rawInput) {
-                  chatLogs.append("\nYou: " + rawInput + "\n");
-                  String processingText = rawInput.toLowerCase().trim();
-                  
-                  int conceptId = ArabiMatrix.getWordId(processingText);
-                  if (conceptId != -1) {
-                      String binaryCode = ArabiMatrix.toBinary(conceptId);
-                      String conceptLogic = ArabiMatrix.getFormulaFromId(conceptId);
-                      if(conceptId == 4001) {
-                          narrateAndLog("[Binary: " + binaryCode + "] Geometry Match! Formula: " + conceptLogic + ". Values likhein.");
-                          return;
-                      }
+              // Update displays according to current script
+              private void updateDisplays() {
+                  if(currentExpression.length() == 0) {
+                      display.setText(Engines.ScriptEngine.applyScript("0", currentScript));
+                  } else {
+                      display.setText(Engines.ScriptEngine.applyScript(currentExpression.toString(), currentScript));
                   }
-
-                  processingText = processingText.replace("ka", "*").replace("of", "*");
-                  processingText = processingText.replace("percent", "/100").replace("pratishat", "/100");
-                  processingText = processingText.replace("plus", "+").replace("aur", "+").replace("add", "+");
-                  processingText = processingText.replace("minus", "-").replace("ghatao", "-").replace("subtract", "-");
-                  processingText = processingText.replace("multiply", "*").replace("into", "*").replace("guna", "*");
-                  processingText = processingText.replace("divide", "/").replace("bhag", "/").replace("taqseem", "/");
-                  processingText = processingText.replace("÷", "/").replace("×", "*");
-
-                  // Clean string for native math evaluator
-                  String mathOnly = processingText.replaceAll("[^0-9+\\-*/().]", "");
-                  calculateNativeResult(mathOnly, true);
               }
 
-              // ================= NATIVE MAKKHAN EVALUATOR (Zero Crashes) =================
-              private void calculateNativeResult(final String expression, final boolean isFromChat) {
-                  if (expression.isEmpty()) return;
-                  if(!isFromChat) expressionDisplay.setText(expression);
-                  
-                  if (smartCache.containsKey(expression)) {
-                      applyFinalResult(expression, smartCache.get(expression), isFromChat);
+              // LIVE PREVIEW LOGIC
+              private void updateLivePreview() {
+                  String expression = currentExpression.toString();
+                  if (expression.isEmpty()) {
+                      livePreviewDisplay.setText("");
                       return;
                   }
-
-                  try {
-                      double result = eval(expression);
-                      String finalResult = (result == (long) result) ? String.format(Locale.US, "%d", (long) result) : String.format(Locale.US, "%s", result);
-                      smartCache.put(expression, finalResult);
-                      applyFinalResult(expression, finalResult, isFromChat);
-                  } catch (Exception e) {
-                      if(isFromChat) {
-                          narrateAndLog("Oops! Math format theek nahi hai.");
-                      } else {
-                          display.setText("Error");
-                          currentExpression.setLength(0);
-                      }
+                  char lastChar = expression.charAt(expression.length() - 1);
+                  if(lastChar == '+' || lastChar == '-' || lastChar == '*' || lastChar == '/' || lastChar == '.') {
+                      livePreviewDisplay.setText("");
+                      return;
                   }
+                  
+                  cpuExecutor.execute(() -> {
+                      Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                      try {
+                          double rawResult = Engines.MathEngine.evaluate(expression);
+                          String finalResult = Engines.MathEngine.formatIndian(rawResult);
+                          final String scriptedResult = Engines.ScriptEngine.applyScript(finalResult, currentScript);
+                          runOnUiThread(() -> livePreviewDisplay.setText(scriptedResult));
+                      } catch (Exception e) {
+                          runOnUiThread(() -> livePreviewDisplay.setText(""));
+                      }
+                  });
               }
 
-              private void applyFinalResult(String expression, String finalResult, boolean isFromChat) {
-                  historyList.add(expression + " = " + finalResult);
-                  if(isFromChat) {
-                      narrateAndLog("Result: " + finalResult);
-                  } else {
-                      display.setText(finalResult);
-                      currentExpression.setLength(0);
-                      currentExpression.append(finalResult);
-                  }
-              }
-
-              // Super-Fast Native Java Evaluator (No External Dependencies needed)
-              private double eval(final String str) {
-                  return new Object() {
-                      int pos = -1, ch;
-                      void nextChar() { ch = (++pos < str.length()) ? str.charAt(pos) : -1; }
-                      boolean eat(int charToEat) {
-                          while (ch == ' ') nextChar();
-                          if (ch == charToEat) { nextChar(); return true; }
-                          return false;
+              private void calculateResult(String expression) {
+                  if (expression.isEmpty()) return;
+                  expressionDisplay.setText(Engines.ScriptEngine.applyScript(expression, currentScript));
+                  
+                  cpuExecutor.execute(() -> {
+                      Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND); // Max CPU Power
+                      try {
+                          double rawResult = Engines.MathEngine.evaluate(expression);
+                          String finalResult = Engines.MathEngine.formatIndian(rawResult);
+                          final String scriptedResult = Engines.ScriptEngine.applyScript(finalResult, currentScript);
+                          
+                          Engines.HistoryEngine.save(MainActivity.this, expression + " = " + finalResult);
+                          
+                          runOnUiThread(() -> {
+                              display.setText(scriptedResult);
+                              livePreviewDisplay.setText("");
+                              currentExpression.setLength(0);
+                              String continueText = (rawResult == (long)rawResult) ? String.format(Locale.US, "%d", (long)rawResult) : String.valueOf(rawResult);
+                              currentExpression.append(continueText);
+                          });
+                      } catch (Exception e) {
+                          runOnUiThread(() -> {
+                              display.setText("Error");
+                              livePreviewDisplay.setText("");
+                              currentExpression.setLength(0);
+                          });
                       }
-                      double parse() { nextChar(); double x = parseExpression(); if (pos < str.length()) throw new RuntimeException("Unexpected: " + (char)ch); return x; }
-                      double parseExpression() {
-                          double x = parseTerm();
-                          for (;;) { if (eat('+')) x += parseTerm(); else if (eat('-')) x -= parseTerm(); else return x; }
-                      }
-                      double parseTerm() {
-                          double x = parseFactor();
-                          for (;;) { if (eat('*')) x *= parseFactor(); else if (eat('/')) x /= parseFactor(); else return x; }
-                      }
-                      double parseFactor() {
-                          if (eat('+')) return parseFactor(); if (eat('-')) return -parseFactor();
-                          double x; int startPos = this.pos;
-                          if (eat('(')) { x = parseExpression(); eat(')'); }
-                          else if ((ch >= '0' && ch <= '9') || ch == '.') {
-                              while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
-                              x = Double.parseDouble(str.substring(startPos, this.pos));
-                          } else { throw new RuntimeException("Unexpected: " + (char)ch); }
-                          return x;
-                      }
-                  }.parse();
-              }
-
-              private void narrateAndLog(String response) {
-                  chatLogs.append("Z+² AI: " + response + "\n");
-                  chatScroll.post(() -> chatScroll.fullScroll(View.FOCUS_DOWN));
-                  if (tts != null) {
-                      String spokenText = response.replace("*", " multiplied by ").replace("^", " power ");
-                      tts.speak(spokenText, TextToSpeech.QUEUE_FLUSH, null, null);
-                  }
+                  });
               }
 
               private void startVoiceInput() {
@@ -495,22 +578,20 @@ jobs:
                   if (SpeechRecognizer.isRecognitionAvailable(this)) {
                       speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
                       speechRecognizer.setRecognitionListener(new RecognitionListener() {
-                          @Override public void onReadyForSpeech(Bundle params) {}
-                          @Override public void onBeginningOfSpeech() { if(isChatOpen) chatInput.setHint("Sun raha hoon..."); }
+                          @Override public void onReadyForSpeech(Bundle params) { display.setText("Listening..."); livePreviewDisplay.setText(""); }
+                          @Override public void onBeginningOfSpeech() {}
                           @Override public void onRmsChanged(float rmsdB) {}
                           @Override public void onBufferReceived(byte[] buffer) {}
-                          @Override public void onEndOfSpeech() { if(isChatOpen) chatInput.setHint("Type equation or speak..."); }
-                          @Override public void onError(int error) {}
+                          @Override public void onEndOfSpeech() {}
+                          @Override public void onError(int error) { updateDisplays(); }
                           @Override public void onResults(Bundle results) {
                               ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                               if (matches != null && !matches.isEmpty()) {
-                                  if(isChatOpen) processAiEngine(matches.get(0));
-                                  else { 
-                                      isChatOpen = true; 
-                                      chatContainer.setVisibility(View.VISIBLE); 
-                                      calcContainer.setVisibility(View.GONE);
-                                      processAiEngine(matches.get(0)); 
-                                  }
+                                  String cleanMath = Engines.ScriptEngine.translateToMath(matches.get(0));
+                                  currentExpression.setLength(0);
+                                  currentExpression.append(cleanMath);
+                                  updateDisplays();
+                                  calculateResult(cleanMath);
                               }
                           }
                           @Override public void onPartialResults(Bundle partialResults) {}
@@ -520,52 +601,34 @@ jobs:
               }
 
               private void showHistoryDialog() {
-                  StringBuilder hist = new StringBuilder();
-                  if(historyList.isEmpty()) hist.append("No History Yet");
-                  for(String s : historyList) hist.append(s).append("\n\n");
-                  new AlertDialog.Builder(this).setTitle("Calculation History").setMessage(hist.toString()).setPositiveButton("Close", null).setNegativeButton("Clear", (d, w) -> historyList.clear()).show();
-              }
-              
-              private void hideKeyboard() {
-                  View view = this.getCurrentFocus();
-                  if (view != null) { InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); imm.hideSoftInputFromWindow(view.getWindowToken(), 0); }
+                  String historyData = Engines.HistoryEngine.load(this);
+                  new AlertDialog.Builder(this)
+                      .setTitle("10MB Persistent History")
+                      .setMessage(historyData)
+                      .setPositiveButton("Close", null)
+                      .setNegativeButton("Clear All", (d, w) -> {
+                          Engines.HistoryEngine.clear(this);
+                          Toast.makeText(this, "History Cleared", Toast.LENGTH_SHORT).show();
+                      })
+                      .show();
               }
 
               @Override
               protected void onDestroy() {
-                  if (tts != null) { tts.stop(); tts.shutdown(); }
-                  if (speechRecognizer != null) { speechRecognizer.destroy(); }
+                  if (speechRecognizer != null) speechRecognizer.destroy();
+                  if (cpuExecutor != null) cpuExecutor.shutdown();
                   super.onDestroy();
               }
           }
           EOF
 
-      - name: "12. Create Custom Icon"
-        run: |
-          cat << 'EOF' > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
-          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-              <path android:fillColor="#0A0A0A" android:pathData="M0,0h108v108h-108z"/>
-              <path android:fillColor="#333333" android:pathData="M53,0h2v108h-2z"/>
-              <path android:fillColor="#333333" android:pathData="M0,53h108v2h-108z"/>
-              <path android:fillColor="#FFFFFF" android:pathData="M20,25h20v4h-20z"/>
-              <path android:fillColor="#FFFFFF" android:pathData="M28,68h4v8h8v4h-8v8h-4v-8h-8v-4h8z"/>
-              <path android:fillColor="#FFFFFF" android:pathData="M72,20l4,-4l10,10l10,-10l4,4l-10,10l10,10l-4,4l-10,-10l-10,10l-4,-4l10,-10z"/>
-              <path android:fillColor="#1565C0" android:pathData="M54,54l27,-10l27,10v54l-27,10l-27,-10z"/>
-              <path android:fillColor="#0D47A1" android:pathData="M54,54l27,10v54l-27,-10z"/>
-              <path android:fillColor="#FFFFFF" android:pathData="M65,75l20,-5v4l-20,5z M65,85l20,-5v4l-20,5z"/>
-          </vector>
-          EOF
-          cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
-          cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml app/src/main/res/mipmap-xhdpi/ic_launcher.xml
-          cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml app/src/main/res/mipmap-xhdpi/ic_launcher_round.xml
-
-      - name: "13. Build Fast APK"
+      - name: "13. Build Native APK"
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: "14. Upload Final App"
+      - name: "14. Upload Clean App"
         uses: actions/upload-artifact@v4
         with:
-          name: "Z-Plus-Squared-Makkhan"
+          name: "Zeeshan-Independence-Update"
           path: app/build/outputs/apk/debug/app-debug.apk
