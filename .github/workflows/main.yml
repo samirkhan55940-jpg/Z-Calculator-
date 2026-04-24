@@ -1,4 +1,4 @@
-name: "Build Zeeshan Pro Calc (Independence Update)"
+name: "Build Zeeshan Pro Calculator (Language & Voice Update)"
 
 on:
   push:
@@ -18,18 +18,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: "3. Create App Directories"
+      - name: "3. Create App Directories (With Language Folders)"
         run: |
           mkdir -p app/src/main/java/com/zeeshan/calculator
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/values-hi
+          mkdir -p app/src/main/res/values-ur
           mkdir -p app/src/main/res/values-night
           mkdir -p app/src/main/res/drawable
           mkdir -p app/src/main/res/mipmap-anydpi-v26
           mkdir -p app/src/main/res/mipmap-xhdpi
-          mkdir -p app/src/main/assets
 
-      - name: "4. Initialize Clean Gradle System"
+      - name: "4. Initialize Clean Gradle System (4GB RAM Fix)"
         run: |
           cat << 'EOF' > settings.gradle
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
@@ -43,14 +44,14 @@ jobs:
           EOF
 
           cat << 'EOF' > gradle.properties
-          org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8
+          org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8
           android.useAndroidX=true
           android.enableJetifier=true
           EOF
           
           gradle wrapper --gradle-version 8.4
 
-      - name: "5. Android Native Config (Master Build Fix)"
+      - name: "5. Android Native Config (Master Packaging Fix)"
         run: |
           cat << 'EOF' > app/build.gradle
           plugins { id 'com.android.application' }
@@ -61,24 +62,26 @@ jobs:
                   applicationId 'com.zeeshan.calculator'
                   minSdk 26
                   targetSdk 34
-                  versionCode 18
-                  versionName "18.0-Independence"
+                  versionCode 19
+                  versionName "19.0-MultiLang-Voice"
               }
               buildTypes {
-                  debug { minifyEnabled true; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' }
+                  debug { minifyEnabled false; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' }
                   release { minifyEnabled true; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' }
               }
               compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
               
-              // Bulletproof Packaging to avoid duplicate/missing file crashes
-              packagingOptions {
-                  pickFirst '**/*.xsd'
-                  exclude 'META-INF/DEPENDENCIES'
-                  exclude 'META-INF/LICENSE*'
-                  exclude 'META-INF/license*'
-                  exclude 'META-INF/NOTICE*'
-                  exclude 'META-INF/notice*'
-                  exclude 'META-INF/*.kotlin_module'
+              packaging {
+                  resources {
+                      pickFirsts += "**/*.xsd"
+                      excludes += "META-INF/DEPENDENCIES"
+                      excludes += "META-INF/LICENSE"
+                      excludes += "META-INF/LICENSE.txt"
+                      excludes += "META-INF/NOTICE"
+                      excludes += "META-INF/NOTICE.txt"
+                      excludes += "META-INF/ASL2.0"
+                      excludes += "META-INF/*.kotlin_module"
+                  }
               }
           }
           dependencies {
@@ -93,7 +96,60 @@ jobs:
           -dontwarn java.lang.management.**
           EOF
 
-      - name: "6. Theme Visuals & Colors"
+      - name: "6. Create Azaad Strings (English, Hindi, Urdu)"
+        run: |
+          # English
+          cat << 'EOF' > app/src/main/res/values/strings.xml
+          <resources>
+              <string name="app_name">Z+² Calculator</string>
+              <string name="menu_title">Menu</string>
+              <string name="nav_history">View History</string>
+              <string name="nav_theme">Theme Mode</string>
+              <string name="lang_label">Script Language:</string>
+              <string name="mic_error">Voice Error</string>
+              <string name="clear_history">Clear All</string>
+              <string name="close">Close</string>
+              <string name="history_title">10MB Persistent History</string>
+              <string name="error_msg">Error</string>
+              <string name="back">Back</string>
+          </resources>
+          EOF
+
+          # Hindi
+          cat << 'EOF' > app/src/main/res/values-hi/strings.xml
+          <resources>
+              <string name="app_name">Z+² Calculator</string>
+              <string name="menu_title">मेन्यू</string>
+              <string name="nav_history">इतिहास देखें</string>
+              <string name="nav_theme">थीम बदलें</string>
+              <string name="lang_label">भाषा:</string>
+              <string name="mic_error">आवाज़ में त्रुटि</string>
+              <string name="clear_history">साफ़ करें</string>
+              <string name="close">बंद करें</string>
+              <string name="history_title">१०MB मेमोरी इतिहास</string>
+              <string name="error_msg">त्रुटि</string>
+              <string name="back">वापस</string>
+          </resources>
+          EOF
+
+          # Urdu
+          cat << 'EOF' > app/src/main/res/values-ur/strings.xml
+          <resources>
+              <string name="app_name">Z+² Calculator</string>
+              <string name="menu_title">مینو</string>
+              <string name="nav_history">ہسٹری دیکھیں</string>
+              <string name="nav_theme">تھیم بدلیں</string>
+              <string name="lang_label">زبان:</string>
+              <string name="mic_error">آواز میں خرابی</string>
+              <string name="clear_history">صاف کریں</string>
+              <string name="close">بند کریں</string>
+              <string name="history_title">10 ایم بی ہسٹری</string>
+              <string name="error_msg">خرابی</string>
+              <string name="back">واپس</string>
+          </resources>
+          EOF
+
+      - name: "7. Theme Visuals & Colors"
         run: |
           cat << 'EOF' > app/src/main/res/values/colors.xml
           <resources>
@@ -130,7 +186,7 @@ jobs:
           </resources>
           EOF
 
-      - name: "7. Create UI Drawables"
+      - name: "8. Create UI Drawables"
         run: |
           cat << 'EOF' > app/src/main/res/drawable/bg_btn_num.xml
           <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval"><solid android:color="@color/btn_num"/><stroke android:width="1dp" android:color="#1A000000"/></shape>
@@ -145,7 +201,7 @@ jobs:
           <shape xmlns:android="http://schemas.android.com/apk/res/android"><solid android:color="@color/btn_num"/><corners android:radius="40dp"/><stroke android:width="1dp" android:color="#1A000000"/></shape>
           EOF
 
-      - name: "8. 3D Dark Custom Icon"
+      - name: "9. 3D Dark Custom Icon"
         run: |
           cat << 'EOF' > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
@@ -165,7 +221,7 @@ jobs:
           cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml app/src/main/res/mipmap-xhdpi/ic_launcher.xml
           cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml app/src/main/res/mipmap-xhdpi/ic_launcher_round.xml
 
-      - name: "9. UI Layout XML (Live Preview & Language Options)"
+      - name: "10. UI Layout XML (With Voice Toggle)"
         run: |
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -175,8 +231,9 @@ jobs:
                   
                   <LinearLayout android:id="@+id/top_bar" android:layout_width="match_parent" android:layout_height="60dp" android:orientation="horizontal" android:gravity="center_vertical" android:padding="10dp">
                       <Button android:id="@+id/btn_menu" android:layout_width="45dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:text="≡" android:textColor="@color/text_main" android:textSize="22sp"/>
-                      <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Zeeshan" android:textColor="@color/text_main" android:textSize="22sp" android:textStyle="bold" android:gravity="center"/>
-                      <Button android:id="@+id/btn_mic" android:layout_width="60dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:text="🎤" android:textColor="@color/text_main" android:textSize="18sp"/>
+                      <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/app_name" android:textColor="@color/text_main" android:textSize="20sp" android:textStyle="bold" android:gravity="center"/>
+                      <Button android:id="@+id/btn_speaker" android:layout_width="45dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:text="🔊" android:textColor="@color/text_main" android:textSize="18sp" android:layout_marginEnd="5dp"/>
+                      <Button android:id="@+id/btn_mic" android:layout_width="45dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:text="🎤" android:textColor="@color/text_main" android:textSize="18sp"/>
                   </LinearLayout>
 
                   <LinearLayout android:id="@+id/calc_container" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_below="@id/top_bar" android:orientation="vertical" android:padding="20dp">
@@ -223,42 +280,63 @@ jobs:
               </RelativeLayout>
 
               <LinearLayout android:layout_width="260dp" android:layout_height="match_parent" android:layout_gravity="start" android:background="@color/bg_main" android:orientation="vertical" android:padding="20dp">
-                  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Zeeshan" android:textSize="26sp" android:textStyle="bold" android:textColor="@color/brand_color" android:layout_marginBottom="30dp"/>
-                  <Button android:id="@+id/nav_history" android:layout_width="match_parent" android:layout_height="50dp" android:text="View History" android:background="@drawable/bg_btn_top" android:textColor="@color/text_main" android:layout_marginBottom="15dp"/>
-                  <Button android:id="@+id/nav_theme" android:layout_width="match_parent" android:layout_height="50dp" android:text="Theme Mode" android:background="@drawable/bg_btn_top" android:textColor="@color/text_main" android:layout_marginBottom="15dp"/>
-                  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Script Language:" android:textColor="@color/text_sec" android:layout_marginBottom="5dp"/>
+                  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/menu_title" android:textSize="26sp" android:textStyle="bold" android:textColor="@color/brand_color" android:layout_marginBottom="30dp"/>
+                  <Button android:id="@+id/nav_history" android:layout_width="match_parent" android:layout_height="50dp" android:text="@string/nav_history" android:background="@drawable/bg_btn_top" android:textColor="@color/text_main" android:layout_marginBottom="15dp"/>
+                  <Button android:id="@+id/nav_theme" android:layout_width="match_parent" android:layout_height="50dp" android:text="@string/nav_theme" android:background="@drawable/bg_btn_top" android:textColor="@color/text_main" android:layout_marginBottom="15dp"/>
+                  
+                  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/lang_label" android:textColor="@color/text_sec" android:layout_marginBottom="5dp"/>
                   <Spinner android:id="@+id/nav_language" android:layout_width="match_parent" android:layout_height="40dp" android:background="@drawable/bg_btn_top" android:padding="5dp"/>
               </LinearLayout>
           </androidx.drawerlayout.widget.DrawerLayout>
           EOF
 
-      - name: "10. AndroidManifest"
+      - name: "10.1 Create Full-Screen History Layout XML"
+        run: |
+          cat << 'EOF' > app/src/main/res/layout/activity_history.xml
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent" android:layout_height="match_parent"
+              android:orientation="vertical" android:background="@color/bg_main" android:padding="16dp">
+
+              <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="20dp">
+                  <Button android:id="@+id/btn_back" android:layout_width="wrap_content" android:layout_height="40dp" android:background="@drawable/bg_btn_top" android:text="@string/back" android:textColor="@color/text_main"/>
+                  <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/history_title" android:textColor="@color/brand_color" android:textSize="20sp" android:textStyle="bold" android:gravity="center"/>
+                  <Button android:id="@+id/btn_clear" android:layout_width="wrap_content" android:layout_height="40dp" android:background="@drawable/bg_btn_op" android:text="@string/clear_history" android:textColor="#FFFFFF"/>
+              </LinearLayout>
+
+              <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
+                  <TextView android:id="@+id/tv_history_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/text_main" android:textSize="18sp" android:lineSpacingExtra="8dp"/>
+              </ScrollView>
+          </LinearLayout>
+          EOF
+
+      - name: "11. AndroidManifest"
         run: |
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.RECORD_AUDIO" />
               <uses-permission android:name="android.permission.VIBRATE" />
               <queries><intent><action android:name="android.intent.action.TTS_SERVICE" /></intent></queries>
-              <application android:label="Zeeshan Calc" android:theme="@style/Theme.ZeeshanCalc" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round">
+              <application android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/Theme.ZeeshanCalc" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round">
                   <activity android:name=".MainActivity" android:exported="true" android:windowSoftInputMode="adjustResize">
                       <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
                   </activity>
+                  <activity android:name=".HistoryActivity" android:exported="false" />
               </application>
           </manifest>
           EOF
 
-      - name: "11. Three Powerful Engines (Script Translate, Auto-Trim History, Makkhan Math)"
+      - name: "12. Three Powerful Engines"
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/Engines.java
           package com.zeeshan.calculator;
           import android.content.Context;
           import java.io.*;
           import java.text.NumberFormat;
+          import java.util.ArrayList;
           import java.util.Locale;
 
           public class Engines {
               
-              // --- ENGINE 1: SAMSUNG STYLE MATH & INDIAN FORMAT ---
               public static class MathEngine {
                   public static String formatIndian(double value) {
                       NumberFormat format = NumberFormat.getInstance(new Locale("en", "IN"));
@@ -276,7 +354,7 @@ jobs:
                               if (ch == charToEat) { nextChar(); return true; }
                               return false;
                           }
-                          double parse() { nextChar(); double x = parseExpression(); if (pos < str.length()) throw new RuntimeException("Unexpected"); return x; }
+                          double parse() { nextChar(); double x = parseExpression(); if (pos < str.length()) throw new RuntimeException("Error"); return x; }
                           double parseExpression() {
                               double x = parseTerm();
                               for (;;) { if (eat('+')) x += parseTerm(); else if (eat('-')) x -= parseTerm(); else return x; }
@@ -292,14 +370,13 @@ jobs:
                               else if ((ch >= '0' && ch <= '9') || ch == '.') {
                                   while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
                                   x = Double.parseDouble(str.substring(startPos, this.pos));
-                              } else { throw new RuntimeException("Unexpected"); }
+                              } else { throw new RuntimeException("Error"); }
                               return x;
                           }
                       }.parse();
                   }
               }
 
-              // --- ENGINE 2: SCRIPT TRANSLATOR (Hindi/Urdu Numeral Mapping) ---
               public static class ScriptEngine {
                   public static String applyScript(String input, String lang) {
                       if(input == null) return "";
@@ -308,35 +385,55 @@ jobs:
                       } else if (lang.equals("Urdu")) {
                           return input.replace('0','۰').replace('1','۱').replace('2','۲').replace('3','۳').replace('4','۴').replace('5','۵').replace('6','۶').replace('7','۷').replace('8','۸').replace('9','۹');
                       }
-                      return input; // Default English
+                      return input; 
                   }
                   
                   public static String translateToMath(String voiceInput) {
                       String text = voiceInput.toLowerCase().trim();
-                      text = text.replace("plus", "+").replace("aur", "+").replace("add", "+").replace("jodo", "+");
-                      text = text.replace("minus", "-").replace("subtract", "-").replace("ghatao", "-");
-                      text = text.replace("multiply", "*").replace("into", "*").replace("guna", "*").replace("multiplied by", "*");
+                      text = text.replace("plus", "+").replace("aur", "+").replace("add", "+").replace("jodo", "+").replace("jama", "+");
+                      text = text.replace("minus", "-").replace("subtract", "-").replace("ghatao", "-").replace("tafriq", "-");
+                      text = text.replace("multiply", "*").replace("into", "*").replace("guna", "*").replace("zarb", "*");
                       text = text.replace("divide", "/").replace("bhag", "/").replace("taqseem", "/").replace("divided by", "/");
                       text = text.replace("x", "*").replace("÷", "/").replace("×", "*");
                       return text.replaceAll("[^0-9+\\-*/().]", ""); 
                   }
               }
 
-              // --- ENGINE 3: TRUE 10MB PERSISTENT HISTORY (AUTO-TRIM) ---
               public static class HistoryEngine {
                   private static final String FILE_NAME = "calc_history_10mb.txt";
-                  private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+                  private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB Limit
                   
                   public static void save(Context context, String calculation) {
                       try {
                           File file = new File(context.getFilesDir(), FILE_NAME);
+                          
                           if(file.exists() && file.length() > MAX_FILE_SIZE) {
-                              file.delete(); 
+                              trimHistory(context, file);
                           }
+                          
                           FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_APPEND);
                           fos.write((calculation + "\n").getBytes());
                           fos.close();
-                      } catch (Exception e) { e.printStackTrace(); }
+                      } catch (Exception e) { /* silently ignore to not crash app */ }
+                  }
+
+                  private static void trimHistory(Context context, File file) {
+                      try {
+                          FileInputStream fis = new FileInputStream(file);
+                          BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+                          ArrayList<String> lines = new ArrayList<>();
+                          String line;
+                          while ((line = reader.readLine()) != null) { lines.add(line); }
+                          reader.close(); fis.close();
+                          
+                          int startIndex = (int)(lines.size() * 0.2); 
+                          
+                          FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE); 
+                          for (int i = startIndex; i < lines.size(); i++) {
+                              fos.write((lines.get(i) + "\n").getBytes());
+                          }
+                          fos.close();
+                      } catch(Exception e) { file.delete(); } 
                   }
                   
                   public static String load(Context context) {
@@ -347,13 +444,12 @@ jobs:
                           String line;
                           while ((line = reader.readLine()) != null) {
                               sb.insert(0, line + "\n\n"); 
-                              if (sb.length() > 50000) break; 
                           }
                           reader.close();
                           fis.close();
                       } catch (FileNotFoundException e) {
-                          return "No History Saved Yet.";
-                      } catch (Exception e) { e.printStackTrace(); }
+                          return null;
+                      } catch (Exception e) { return null; }
                       return sb.toString();
                   }
                   
@@ -364,13 +460,52 @@ jobs:
           }
           EOF
 
-      - name: "12. Main Activity (High CPU Priority & Script Integration)"
+      - name: "13. History Activity (Full Screen UI Java)"
+        run: |
+          cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/HistoryActivity.java
+          package com.zeeshan.calculator;
+          
+          import android.os.Bundle;
+          import android.view.View;
+          import android.widget.Button;
+          import android.widget.TextView;
+          import android.widget.Toast;
+          import androidx.appcompat.app.AppCompatActivity;
+
+          public class HistoryActivity extends AppCompatActivity {
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  setContentView(R.layout.activity_history);
+
+                  TextView tvHistory = findViewById(R.id.tv_history_content);
+                  Button btnBack = findViewById(R.id.btn_back);
+                  Button btnClear = findViewById(R.id.btn_clear);
+
+                  String historyData = Engines.HistoryEngine.load(this);
+                  if (historyData == null || historyData.trim().isEmpty()) {
+                      tvHistory.setText(getString(R.string.nav_history) + " Empty");
+                  } else {
+                      tvHistory.setText(historyData);
+                  }
+
+                  btnBack.setOnClickListener(v -> finish());
+                  
+                  btnClear.setOnClickListener(v -> {
+                      Engines.HistoryEngine.clear(this);
+                      tvHistory.setText(getString(R.string.nav_history) + " Empty");
+                      Toast.makeText(this, "History Cleared", Toast.LENGTH_SHORT).show();
+                  });
+              }
+          }
+          EOF
+
+      - name: "14. Main Activity"
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/MainActivity.java
           package com.zeeshan.calculator;
           
           import android.Manifest;
-          import android.app.AlertDialog;
           import android.content.Intent;
           import android.content.pm.PackageManager;
           import android.content.res.Configuration;
@@ -380,6 +515,7 @@ jobs:
           import android.speech.RecognitionListener;
           import android.speech.RecognizerIntent;
           import android.speech.SpeechRecognizer;
+          import android.speech.tts.TextToSpeech;
           import android.view.View;
           import android.view.ViewGroup;
           import android.widget.*;
@@ -397,12 +533,15 @@ jobs:
           public class MainActivity extends AppCompatActivity {
               private DrawerLayout drawerLayout;
               private SpeechRecognizer speechRecognizer;
+              private TextToSpeech tts;
               private TextView display, expressionDisplay, livePreviewDisplay;
               private StringBuilder currentExpression = new StringBuilder();
               private Vibrator vibrator;
-              private String currentScript = "English"; // Default
               
-              // Background Executor for High Power CPU calculations
+              private String currentScript = "English";
+              private Locale currentLocale = new Locale("en", "IN");
+              private boolean isVoiceEnabled = true;
+              
               private ExecutorService cpuExecutor = Executors.newSingleThreadExecutor();
 
               @Override
@@ -415,26 +554,34 @@ jobs:
                   livePreviewDisplay = findViewById(R.id.tv_live_preview);
                   drawerLayout = findViewById(R.id.drawer_layout);
                   
-                  try {
-                      vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-                  } catch(Exception e){}
+                  try { vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE); } catch(Exception e){}
+
+                  tts = new TextToSpeech(this, status -> {
+                      if (status == TextToSpeech.SUCCESS) tts.setLanguage(currentLocale);
+                  });
 
                   setupVoice();
                   setupButtons(findViewById(R.id.calc_container));
 
-                  // Sidebar Controls
+                  Button btnSpeaker = findViewById(R.id.btn_speaker);
+                  btnSpeaker.setOnClickListener(v -> {
+                      isVoiceEnabled = !isVoiceEnabled;
+                      btnSpeaker.setText(isVoiceEnabled ? "🔊" : "🔇");
+                  });
+
                   findViewById(R.id.btn_menu).setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+                  
                   findViewById(R.id.nav_history).setOnClickListener(v -> { 
                       drawerLayout.closeDrawer(GravityCompat.START); 
-                      showHistoryDialog(); 
+                      startActivity(new Intent(MainActivity.this, HistoryActivity.class));
                   });
+                  
                   findViewById(R.id.nav_theme).setOnClickListener(v -> {
                       drawerLayout.closeDrawer(GravityCompat.START);
                       int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
                       AppCompatDelegate.setDefaultNightMode(currentNightMode == Configuration.UI_MODE_NIGHT_YES ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
                   });
 
-                  // Setup Script Spinner
                   Spinner langSpinner = findViewById(R.id.nav_language);
                   ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"English", "Hindi", "Urdu"});
                   adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -443,7 +590,11 @@ jobs:
                       @Override
                       public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                           currentScript = (String) parent.getItemAtPosition(position);
-                          updateDisplays(); // Refresh display with new script
+                          if(currentScript.equals("Hindi")) currentLocale = new Locale("hi", "IN");
+                          else if(currentScript.equals("Urdu")) currentLocale = new Locale("ur", "PK");
+                          else currentLocale = new Locale("en", "IN");
+                          if(tts != null) tts.setLanguage(currentLocale);
+                          updateDisplays();
                       }
                       @Override public void onNothingSelected(AdapterView<?> parent) {}
                   });
@@ -461,10 +612,9 @@ jobs:
               }
 
               private void onButtonClick(Button button) {
-                  if (vibrator != null) {
-                      try{ vibrator.vibrate(20); } catch(Exception e){}
-                  }
+                  if (vibrator != null) { try{ vibrator.vibrate(20); } catch(Exception e){} }
                   String btnText = button.getText().toString();
+                  String errorText = getString(R.string.error_msg);
                   
                   if (btnText.equals("AC")) { 
                       currentExpression.setLength(0); 
@@ -479,15 +629,13 @@ jobs:
                           updateLivePreview();
                       } 
                   }
-                  else if (btnText.equals("=")) { 
-                      calculateResult(currentExpression.toString()); 
-                  }
+                  else if (btnText.equals("=")) { calculateResult(currentExpression.toString()); }
                   else {
                       String insertText = btnText;
                       if (btnText.equals("÷")) insertText = "/";
                       if (btnText.equals("×")) insertText = "*";
                       
-                      if (currentExpression.length() == 0 || display.getText().toString().equals("Error")) { 
+                      if (currentExpression.length() == 0 || display.getText().toString().equals(errorText)) { 
                           if (!insertText.equals("/") && !insertText.equals("*") && !insertText.equals("+") && !insertText.equals("-") && !insertText.equals(".")) {
                               currentExpression.setLength(0); 
                           }
@@ -498,38 +646,25 @@ jobs:
                   }
               }
 
-              // Update displays according to current script
               private void updateDisplays() {
-                  if(currentExpression.length() == 0) {
-                      display.setText(Engines.ScriptEngine.applyScript("0", currentScript));
-                  } else {
-                      display.setText(Engines.ScriptEngine.applyScript(currentExpression.toString(), currentScript));
-                  }
+                  if(currentExpression.length() == 0) display.setText(Engines.ScriptEngine.applyScript("0", currentScript));
+                  else display.setText(Engines.ScriptEngine.applyScript(currentExpression.toString(), currentScript));
               }
 
-              // LIVE PREVIEW LOGIC
               private void updateLivePreview() {
                   String expression = currentExpression.toString();
-                  if (expression.isEmpty()) {
-                      livePreviewDisplay.setText("");
-                      return;
-                  }
+                  if (expression.isEmpty()) { livePreviewDisplay.setText(""); return; }
                   char lastChar = expression.charAt(expression.length() - 1);
-                  if(lastChar == '+' || lastChar == '-' || lastChar == '*' || lastChar == '/' || lastChar == '.') {
-                      livePreviewDisplay.setText("");
-                      return;
-                  }
+                  if(lastChar == '+' || lastChar == '-' || lastChar == '*' || lastChar == '/' || lastChar == '.') { livePreviewDisplay.setText(""); return; }
                   
                   cpuExecutor.execute(() -> {
                       Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                       try {
                           double rawResult = Engines.MathEngine.evaluate(expression);
-                          String finalResult = Engines.MathEngine.formatIndian(rawResult);
-                          final String scriptedResult = Engines.ScriptEngine.applyScript(finalResult, currentScript);
+                          String formattedResult = Engines.MathEngine.formatIndian(rawResult);
+                          final String scriptedResult = Engines.ScriptEngine.applyScript(formattedResult, currentScript);
                           runOnUiThread(() -> livePreviewDisplay.setText(scriptedResult));
-                      } catch (Exception e) {
-                          runOnUiThread(() -> livePreviewDisplay.setText(""));
-                      }
+                      } catch (Exception e) { runOnUiThread(() -> livePreviewDisplay.setText("")); }
                   });
               }
 
@@ -538,24 +673,29 @@ jobs:
                   expressionDisplay.setText(Engines.ScriptEngine.applyScript(expression, currentScript));
                   
                   cpuExecutor.execute(() -> {
-                      Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND); // Max CPU Power
+                      Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
                       try {
                           double rawResult = Engines.MathEngine.evaluate(expression);
-                          String finalResult = Engines.MathEngine.formatIndian(rawResult);
-                          final String scriptedResult = Engines.ScriptEngine.applyScript(finalResult, currentScript);
+                          String formattedResult = Engines.MathEngine.formatIndian(rawResult);
+                          final String scriptedResult = Engines.ScriptEngine.applyScript(formattedResult, currentScript);
                           
-                          Engines.HistoryEngine.save(MainActivity.this, expression + " = " + finalResult);
+                          Engines.HistoryEngine.save(MainActivity.this, expression + " = " + formattedResult);
                           
                           runOnUiThread(() -> {
                               display.setText(scriptedResult);
                               livePreviewDisplay.setText("");
                               currentExpression.setLength(0);
+                              
+                              if (isVoiceEnabled && tts != null) {
+                                  tts.speak(formattedResult, TextToSpeech.QUEUE_FLUSH, null, null);
+                              }
+
                               String continueText = (rawResult == (long)rawResult) ? String.format(Locale.US, "%d", (long)rawResult) : String.valueOf(rawResult);
                               currentExpression.append(continueText);
                           });
                       } catch (Exception e) {
                           runOnUiThread(() -> {
-                              display.setText("Error");
+                              display.setText(getString(R.string.error_msg));
                               livePreviewDisplay.setText("");
                               currentExpression.setLength(0);
                           });
@@ -569,7 +709,7 @@ jobs:
                   } else if (speechRecognizer != null) {
                       Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                       intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                      intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+                      intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, currentLocale.toString());
                       speechRecognizer.startListening(intent);
                   }
               }
@@ -578,7 +718,7 @@ jobs:
                   if (SpeechRecognizer.isRecognitionAvailable(this)) {
                       speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
                       speechRecognizer.setRecognitionListener(new RecognitionListener() {
-                          @Override public void onReadyForSpeech(Bundle params) { display.setText("Listening..."); livePreviewDisplay.setText(""); }
+                          @Override public void onReadyForSpeech(Bundle params) { display.setText("..."); livePreviewDisplay.setText(""); }
                           @Override public void onBeginningOfSpeech() {}
                           @Override public void onRmsChanged(float rmsdB) {}
                           @Override public void onBufferReceived(byte[] buffer) {}
@@ -587,7 +727,7 @@ jobs:
                           @Override public void onResults(Bundle results) {
                               ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                               if (matches != null && !matches.isEmpty()) {
-                                  String cleanMath = Engines.ScriptEngine.translateToMath(matches.get(0));
+                                  String cleanMath = Engines.VoiceEngine.translateToMath(matches.get(0));
                                   currentExpression.setLength(0);
                                   currentExpression.append(cleanMath);
                                   updateDisplays();
@@ -600,21 +740,9 @@ jobs:
                   }
               }
 
-              private void showHistoryDialog() {
-                  String historyData = Engines.HistoryEngine.load(this);
-                  new AlertDialog.Builder(this)
-                      .setTitle("10MB Persistent History")
-                      .setMessage(historyData)
-                      .setPositiveButton("Close", null)
-                      .setNegativeButton("Clear All", (d, w) -> {
-                          Engines.HistoryEngine.clear(this);
-                          Toast.makeText(this, "History Cleared", Toast.LENGTH_SHORT).show();
-                      })
-                      .show();
-              }
-
               @Override
               protected void onDestroy() {
+                  if (tts != null) { tts.stop(); tts.shutdown(); }
                   if (speechRecognizer != null) speechRecognizer.destroy();
                   if (cpuExecutor != null) cpuExecutor.shutdown();
                   super.onDestroy();
@@ -622,13 +750,15 @@ jobs:
           }
           EOF
 
-      - name: "13. Build Native APK"
+      - name: "15. Build Native APK"
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: "14. Upload Clean App"
+      - name: "16. Upload Clean App"
         uses: actions/upload-artifact@v4
         with:
-          name: "Zeeshan-Independence-Update"
+          name: "Zeeshan-FullScreen-Pro"
           path: app/build/outputs/apk/debug/app-debug.apk
+
+ 
