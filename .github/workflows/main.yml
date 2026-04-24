@@ -1,4 +1,4 @@
-name: "Build Zeeshan Pro Calculator (Language & Voice Update)"
+name: "Build Z+2 Calculator (Final Makkhan Pro)"
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
           mkdir -p app/src/main/res/mipmap-anydpi-v26
           mkdir -p app/src/main/res/mipmap-xhdpi
 
-      - name: "4. Initialize Clean Gradle System (4GB RAM Fix)"
+      - name: "4. Initialize Clean Gradle System (4GB RAM)"
         run: |
           cat << 'EOF' > settings.gradle
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
@@ -51,7 +51,7 @@ jobs:
           
           gradle wrapper --gradle-version 8.4
 
-      - name: "5. Android Native Config (Master Packaging Fix)"
+      - name: "5. Android Native Config"
         run: |
           cat << 'EOF' > app/build.gradle
           plugins { id 'com.android.application' }
@@ -62,8 +62,8 @@ jobs:
                   applicationId 'com.zeeshan.calculator'
                   minSdk 26
                   targetSdk 34
-                  versionCode 19
-                  versionName "19.0-MultiLang-Voice"
+                  versionCode 21
+                  versionName "21.0-Final-Makkhan"
               }
               buildTypes {
                   debug { minifyEnabled false; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' }
@@ -71,17 +71,14 @@ jobs:
               }
               compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
               
-              packaging {
-                  resources {
-                      pickFirsts += "**/*.xsd"
-                      excludes += "META-INF/DEPENDENCIES"
-                      excludes += "META-INF/LICENSE"
-                      excludes += "META-INF/LICENSE.txt"
-                      excludes += "META-INF/NOTICE"
-                      excludes += "META-INF/NOTICE.txt"
-                      excludes += "META-INF/ASL2.0"
-                      excludes += "META-INF/*.kotlin_module"
-                  }
+              packagingOptions {
+                  pickFirst '**/*.xsd'
+                  exclude 'META-INF/DEPENDENCIES'
+                  exclude 'META-INF/LICENSE*'
+                  exclude 'META-INF/license*'
+                  exclude 'META-INF/NOTICE*'
+                  exclude 'META-INF/notice*'
+                  exclude 'META-INF/*.kotlin_module'
               }
           }
           dependencies {
@@ -96,12 +93,12 @@ jobs:
           -dontwarn java.lang.management.**
           EOF
 
-      - name: "6. Create Azaad Strings (English, Hindi, Urdu)"
+      - name: "6. Create Azaad Strings (App Name Z+2 Calculator)"
         run: |
           # English
           cat << 'EOF' > app/src/main/res/values/strings.xml
           <resources>
-              <string name="app_name">Z+² Calculator</string>
+              <string name="app_name">Z+2 Calculator</string>
               <string name="menu_title">Menu</string>
               <string name="nav_history">View History</string>
               <string name="nav_theme">Theme Mode</string>
@@ -118,7 +115,7 @@ jobs:
           # Hindi
           cat << 'EOF' > app/src/main/res/values-hi/strings.xml
           <resources>
-              <string name="app_name">Z+² Calculator</string>
+              <string name="app_name">Z+2 Calculator</string>
               <string name="menu_title">मेन्यू</string>
               <string name="nav_history">इतिहास देखें</string>
               <string name="nav_theme">थीम बदलें</string>
@@ -135,7 +132,7 @@ jobs:
           # Urdu
           cat << 'EOF' > app/src/main/res/values-ur/strings.xml
           <resources>
-              <string name="app_name">Z+² Calculator</string>
+              <string name="app_name">Z+2 Calculator</string>
               <string name="menu_title">مینو</string>
               <string name="nav_history">ہسٹری دیکھیں</string>
               <string name="nav_theme">تھیم بدلیں</string>
@@ -221,7 +218,7 @@ jobs:
           cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml app/src/main/res/mipmap-xhdpi/ic_launcher.xml
           cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml app/src/main/res/mipmap-xhdpi/ic_launcher_round.xml
 
-      - name: "10. UI Layout XML (With Voice Toggle)"
+      - name: "10. UI Layout XML (With Ripple Effect added via Foreground)"
         run: |
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -230,10 +227,10 @@ jobs:
               <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/bg_main">
                   
                   <LinearLayout android:id="@+id/top_bar" android:layout_width="match_parent" android:layout_height="60dp" android:orientation="horizontal" android:gravity="center_vertical" android:padding="10dp">
-                      <Button android:id="@+id/btn_menu" android:layout_width="45dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:text="≡" android:textColor="@color/text_main" android:textSize="22sp"/>
+                      <Button android:id="@+id/btn_menu" android:layout_width="45dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:foreground="?attr/selectableItemBackground" android:text="≡" android:textColor="@color/text_main" android:textSize="22sp"/>
                       <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/app_name" android:textColor="@color/text_main" android:textSize="20sp" android:textStyle="bold" android:gravity="center"/>
-                      <Button android:id="@+id/btn_speaker" android:layout_width="45dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:text="🔊" android:textColor="@color/text_main" android:textSize="18sp" android:layout_marginEnd="5dp"/>
-                      <Button android:id="@+id/btn_mic" android:layout_width="45dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:text="🎤" android:textColor="@color/text_main" android:textSize="18sp"/>
+                      <Button android:id="@+id/btn_speaker" android:layout_width="45dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:foreground="?attr/selectableItemBackground" android:text="🔊" android:textColor="@color/text_main" android:textSize="18sp" android:layout_marginEnd="5dp"/>
+                      <Button android:id="@+id/btn_mic" android:layout_width="45dp" android:layout_height="45dp" android:background="@drawable/bg_btn_top" android:foreground="?attr/selectableItemBackground" android:text="🎤" android:textColor="@color/text_main" android:textSize="18sp"/>
                   </LinearLayout>
 
                   <LinearLayout android:id="@+id/calc_container" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_below="@id/top_bar" android:orientation="vertical" android:padding="20dp">
@@ -246,34 +243,34 @@ jobs:
 
                       <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
                           <LinearLayout android:layout_width="match_parent" android:layout_height="75dp" android:orientation="horizontal" android:layout_marginBottom="12dp">
-                              <androidx.appcompat.widget.AppCompatButton android:text="AC" android:textColor="@color/text_main" android:background="@drawable/bg_btn_top" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="22sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="(" android:textColor="@color/text_main" android:background="@drawable/bg_btn_top" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="22sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text=")" android:textColor="@color/text_main" android:background="@drawable/bg_btn_top" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="22sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="÷" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="28sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="AC" android:textColor="@color/text_main" android:background="@drawable/bg_btn_top" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="22sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="(" android:textColor="@color/text_main" android:background="@drawable/bg_btn_top" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="22sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text=")" android:textColor="@color/text_main" android:background="@drawable/bg_btn_top" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="22sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="÷" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="28sp"/>
                           </LinearLayout>
                           <LinearLayout android:layout_width="match_parent" android:layout_height="75dp" android:orientation="horizontal" android:layout_marginBottom="12dp">
-                              <androidx.appcompat.widget.AppCompatButton android:text="7" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="8" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="9" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="×" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="28sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="7" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="8" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="9" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="×" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="28sp"/>
                           </LinearLayout>
                           <LinearLayout android:layout_width="match_parent" android:layout_height="75dp" android:orientation="horizontal" android:layout_marginBottom="12dp">
-                              <androidx.appcompat.widget.AppCompatButton android:text="4" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="5" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="6" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="-" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="32sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="4" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="5" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="6" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="-" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="32sp"/>
                           </LinearLayout>
                           <LinearLayout android:layout_width="match_parent" android:layout_height="75dp" android:orientation="horizontal" android:layout_marginBottom="12dp">
-                              <androidx.appcompat.widget.AppCompatButton android:text="1" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="2" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="3" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="+" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="28sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="1" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="2" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="3" android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="+" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="28sp"/>
                           </LinearLayout>
                           <LinearLayout android:layout_width="match_parent" android:layout_height="75dp" android:orientation="horizontal">
-                              <androidx.appcompat.widget.AppCompatButton android:text="0" android:textColor="@color/text_main" android:background="@drawable/bg_btn_zero" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="." android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="DEL" android:textColor="@color/text_main" android:background="@drawable/bg_btn_top" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="18sp"/>
-                              <androidx.appcompat.widget.AppCompatButton android:text="=" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="28sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="0" android:textColor="@color/text_main" android:background="@drawable/bg_btn_zero" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="." android:textColor="@color/text_main" android:background="@drawable/bg_btn_num" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="24sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="DEL" android:textColor="@color/text_main" android:background="@drawable/bg_btn_top" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="12dp" android:textSize="18sp"/>
+                              <androidx.appcompat.widget.AppCompatButton android:text="=" android:textColor="#FFFFFF" android:background="@drawable/bg_btn_op" android:foreground="?attr/selectableItemBackground" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:textSize="28sp"/>
                           </LinearLayout>
                       </LinearLayout>
                   </LinearLayout>
@@ -281,8 +278,8 @@ jobs:
 
               <LinearLayout android:layout_width="260dp" android:layout_height="match_parent" android:layout_gravity="start" android:background="@color/bg_main" android:orientation="vertical" android:padding="20dp">
                   <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/menu_title" android:textSize="26sp" android:textStyle="bold" android:textColor="@color/brand_color" android:layout_marginBottom="30dp"/>
-                  <Button android:id="@+id/nav_history" android:layout_width="match_parent" android:layout_height="50dp" android:text="@string/nav_history" android:background="@drawable/bg_btn_top" android:textColor="@color/text_main" android:layout_marginBottom="15dp"/>
-                  <Button android:id="@+id/nav_theme" android:layout_width="match_parent" android:layout_height="50dp" android:text="@string/nav_theme" android:background="@drawable/bg_btn_top" android:textColor="@color/text_main" android:layout_marginBottom="15dp"/>
+                  <Button android:id="@+id/nav_history" android:layout_width="match_parent" android:layout_height="50dp" android:text="@string/nav_history" android:background="@drawable/bg_btn_top" android:foreground="?attr/selectableItemBackground" android:textColor="@color/text_main" android:layout_marginBottom="15dp"/>
+                  <Button android:id="@+id/nav_theme" android:layout_width="match_parent" android:layout_height="50dp" android:text="@string/nav_theme" android:background="@drawable/bg_btn_top" android:foreground="?attr/selectableItemBackground" android:textColor="@color/text_main" android:layout_marginBottom="15dp"/>
                   
                   <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/lang_label" android:textColor="@color/text_sec" android:layout_marginBottom="5dp"/>
                   <Spinner android:id="@+id/nav_language" android:layout_width="match_parent" android:layout_height="40dp" android:background="@drawable/bg_btn_top" android:padding="5dp"/>
@@ -290,7 +287,7 @@ jobs:
           </androidx.drawerlayout.widget.DrawerLayout>
           EOF
 
-      - name: "10.1 Create Full-Screen History Layout XML"
+      - name: "11. Create Full-Screen History Layout XML"
         run: |
           cat << 'EOF' > app/src/main/res/layout/activity_history.xml
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -298,18 +295,18 @@ jobs:
               android:orientation="vertical" android:background="@color/bg_main" android:padding="16dp">
 
               <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="20dp">
-                  <Button android:id="@+id/btn_back" android:layout_width="wrap_content" android:layout_height="40dp" android:background="@drawable/bg_btn_top" android:text="@string/back" android:textColor="@color/text_main"/>
+                  <Button android:id="@+id/btn_back" android:layout_width="wrap_content" android:layout_height="40dp" android:background="@drawable/bg_btn_top" android:foreground="?attr/selectableItemBackground" android:text="@string/back" android:textColor="@color/text_main"/>
                   <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/history_title" android:textColor="@color/brand_color" android:textSize="20sp" android:textStyle="bold" android:gravity="center"/>
-                  <Button android:id="@+id/btn_clear" android:layout_width="wrap_content" android:layout_height="40dp" android:background="@drawable/bg_btn_op" android:text="@string/clear_history" android:textColor="#FFFFFF"/>
+                  <Button android:id="@+id/btn_clear" android:layout_width="wrap_content" android:layout_height="40dp" android:background="@drawable/bg_btn_op" android:foreground="?attr/selectableItemBackground" android:text="@string/clear_history" android:textColor="#FFFFFF"/>
               </LinearLayout>
 
-              <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
+              <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
                   <TextView android:id="@+id/tv_history_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/text_main" android:textSize="18sp" android:lineSpacingExtra="8dp"/>
               </ScrollView>
           </LinearLayout>
           EOF
 
-      - name: "11. AndroidManifest"
+      - name: "12. AndroidManifest"
         run: |
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -325,7 +322,7 @@ jobs:
           </manifest>
           EOF
 
-      - name: "12. Three Powerful Engines"
+      - name: "13. Three Powerful Engines (ADDED VoiceEngine Fix)"
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/Engines.java
           package com.zeeshan.calculator;
@@ -387,7 +384,10 @@ jobs:
                       }
                       return input; 
                   }
-                  
+              }
+
+              // VOICE ENGINE FIXED (Restored missing code)
+              public static class VoiceEngine {
                   public static String translateToMath(String voiceInput) {
                       String text = voiceInput.toLowerCase().trim();
                       text = text.replace("plus", "+").replace("aur", "+").replace("add", "+").replace("jodo", "+").replace("jama", "+");
@@ -414,7 +414,7 @@ jobs:
                           FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_APPEND);
                           fos.write((calculation + "\n").getBytes());
                           fos.close();
-                      } catch (Exception e) { /* silently ignore to not crash app */ }
+                      } catch (Exception e) { }
                   }
 
                   private static void trimHistory(Context context, File file) {
@@ -460,7 +460,7 @@ jobs:
           }
           EOF
 
-      - name: "13. History Activity (Full Screen UI Java)"
+      - name: "14. History Activity (Full Screen UI Java)"
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/HistoryActivity.java
           package com.zeeshan.calculator;
@@ -494,18 +494,19 @@ jobs:
                   btnClear.setOnClickListener(v -> {
                       Engines.HistoryEngine.clear(this);
                       tvHistory.setText(getString(R.string.nav_history) + " Empty");
-                      Toast.makeText(this, "History Cleared", Toast.LENGTH_SHORT).show();
+                      Toast.makeText(this, getString(R.string.clear_history), Toast.LENGTH_SHORT).show();
                   });
               }
           }
           EOF
 
-      - name: "14. Main Activity"
+      - name: "15. Main Activity (ADDED Missing Context Import)"
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/MainActivity.java
           package com.zeeshan.calculator;
           
           import android.Manifest;
+          import android.content.Context; // <-- YEH IMPORT MISSING THA, FIX KAR DIYA
           import android.content.Intent;
           import android.content.pm.PackageManager;
           import android.content.res.Configuration;
@@ -541,6 +542,7 @@ jobs:
               private String currentScript = "English";
               private Locale currentLocale = new Locale("en", "IN");
               private boolean isVoiceEnabled = true;
+              private boolean isListening = false;
               
               private ExecutorService cpuExecutor = Executors.newSingleThreadExecutor();
 
@@ -554,6 +556,7 @@ jobs:
                   livePreviewDisplay = findViewById(R.id.tv_live_preview);
                   drawerLayout = findViewById(R.id.drawer_layout);
                   
+                  // FIXED Context symbol error
                   try { vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE); } catch(Exception e){}
 
                   tts = new TextToSpeech(this, status -> {
@@ -599,7 +602,18 @@ jobs:
                       @Override public void onNothingSelected(AdapterView<?> parent) {}
                   });
 
-                  findViewById(R.id.btn_mic).setOnClickListener(v -> startVoiceInput());
+                  Button btnMic = findViewById(R.id.btn_mic);
+                  btnMic.setOnClickListener(v -> {
+                      if(isListening) {
+                          if(speechRecognizer != null) speechRecognizer.stopListening();
+                          isListening = false;
+                          btnMic.setText("🎤");
+                      } else {
+                          startVoiceInput();
+                          isListening = true;
+                          btnMic.setText("🛑");
+                      }
+                  });
               }
 
               private void setupButtons(View view) {
@@ -722,8 +736,15 @@ jobs:
                           @Override public void onBeginningOfSpeech() {}
                           @Override public void onRmsChanged(float rmsdB) {}
                           @Override public void onBufferReceived(byte[] buffer) {}
-                          @Override public void onEndOfSpeech() {}
-                          @Override public void onError(int error) { updateDisplays(); }
+                          @Override public void onEndOfSpeech() { 
+                              isListening = false;
+                              ((Button)findViewById(R.id.btn_mic)).setText("🎤");
+                          }
+                          @Override public void onError(int error) { 
+                              updateDisplays(); 
+                              isListening = false;
+                              ((Button)findViewById(R.id.btn_mic)).setText("🎤");
+                          }
                           @Override public void onResults(Bundle results) {
                               ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                               if (matches != null && !matches.isEmpty()) {
@@ -733,6 +754,8 @@ jobs:
                                   updateDisplays();
                                   calculateResult(cleanMath);
                               }
+                              isListening = false;
+                              ((Button)findViewById(R.id.btn_mic)).setText("🎤");
                           }
                           @Override public void onPartialResults(Bundle partialResults) {}
                           @Override public void onEvent(int eventType, Bundle params) {}
@@ -750,15 +773,13 @@ jobs:
           }
           EOF
 
-      - name: "15. Build Native APK"
+      - name: "16. Build Native APK"
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: "16. Upload Clean App"
+      - name: "17. Upload Clean App"
         uses: actions/upload-artifact@v4
         with:
           name: "Zeeshan-FullScreen-Pro"
           path: app/build/outputs/apk/debug/app-debug.apk
-
- 
